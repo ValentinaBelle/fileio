@@ -1,17 +1,23 @@
 from tkinter import *
 from tkinter import filedialog as fd
+from tkinter import messagebox as mb
 from tkinter import ttk
 import requests
 
 
 def upload():
-    filepath = fd.askopenfilename()
-    if filepath:
-        files = {'file': open(filepath, 'rb')}
-        response = requests.post('https://fileio', files=files)
-        if response.status_code == 200:
-            link = response.json()['link'] # получаем ссылку
-            entry.insert(0, link) # показываем ссылку в entry
+    try:
+        filepath = fd.askopenfilename()
+        if filepath:
+            with open(filepath, 'rb') as f:
+                files = {'file': f}
+                response = requests.post('https://fileio', files=files)
+                response.raise_for_status()
+                link = response.json()['link']  # получаем ссылку
+                entry.delete(0, END)  # удаляем поле с предыдущей ссылкой перед выводом новой
+                entry.insert(0, link)  # показываем ссылку в entry
+    except Exception as e:
+        mb.showerror("Ошибка", f"Произошла ошибка: {e}")
 
 
 window = Tk()
